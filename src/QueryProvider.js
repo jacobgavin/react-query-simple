@@ -14,19 +14,21 @@ export default function QueryProvider({ children }) {
 	);
 }
 
-export function useQuery(url) {
+export function useQuery(fetchFn, config) {
 	const context = useContext(QueryContext)
 	const [data, setData] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
 	
+	const queryKey = context.query.getQueryKey(config.queryKey);
 	useEffect(() => {
 		setIsLoading(true);
 		(async function() {
-			const response = await context.query.callAsync(url);
+			const response = await context.query.callAsync(fetchFn, { queryKey });
+			console.log('response', response)
 			setData(response)
 			setIsLoading(false);
 		})();
-	}, [url, context.query]);
+	}, [queryKey]);
 
 	if (context === undefined) {
 		throw new Error('useQuery must be used within a QueryProvider');
@@ -38,6 +40,7 @@ export function useQuery(url) {
 		isLoading
 	};
 }
+
 
 /* export function useMutation(fetchFn) {
 	const context = useContext(QueryContext)
